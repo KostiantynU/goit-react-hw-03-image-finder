@@ -20,5 +20,12 @@ export function ImageGallery(props) {
   );
 }
 ImageGallery.propTypes = {
-  arrayOfImages: PropTypes.arrayOf(PropTypes.shape),
+  arrayOfImages: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+      tags: PropTypes.string.isrequired,
+    })
+  ).isRequired,
 };
