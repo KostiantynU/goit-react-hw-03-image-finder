@@ -3,7 +3,7 @@ import css from './ImageGallery.module.css';
 import { ImageGalleryItem } from 'components/ImageGalleryItem';
 import PropTypes from 'prop-types';
 export function ImageGallery(props) {
-  const { arrayOfImages } = props;
+  const { arrayOfImages, showModal } = props;
   return (
     <ul className={css.ImageGallery} id={`ImageGallery`}>
       {arrayOfImages.map(({ id, webformatURL, largeImageURL, tags }) => {
@@ -11,8 +11,9 @@ export function ImageGallery(props) {
           <ImageGalleryItem
             key={id}
             webformatURL={webformatURL}
-            largeImageURL={largeImageURL}
             tags={tags}
+            largeImageURL={largeImageURL}
+            onClick={showModal}
           />
         );
       })}
@@ -28,4 +29,5 @@ ImageGallery.propTypes = {
       tags: PropTypes.string.isRequired,
     })
   ).isRequired,
+  showModal: PropTypes.func.isRequired,
 };

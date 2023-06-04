@@ -10,4 +10,3 @@ export async function getImages(searchString) {
     }
   );
 }
-// image_type=photo&orientation=horizontal

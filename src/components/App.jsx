@@ -4,7 +4,8 @@ import { Searchbar } from './Searchbar/';
 import { ImageGallery } from './ImageGallery';
 import { getImages } from './Services/Api';
 import { ButtonLoadMore } from './ButtonLoadMore/ButtonLoadMore';
-
+import { Modal } from './Modal';
+import { Grid } from 'react-loader-spinner';
 export class App extends Component {
   state = {
     arrayOfImages: [],
@@ -12,12 +13,15 @@ export class App extends Component {
     perPage: 12,
     searchQuery: '',
     searchQueryForFetch: '',
+    showBtn: false,
     isScrollTrue: false,
+    altForImg: '',
+    largeImg: '',
+    isLoader: false,
+    isError: '',
   };
 
-  componentDidMount() {}
-
-  componentDidUpdate(_, prevState) {
+  componentDidUpdate() {
     if (this.state.isScrollTrue) {
       this.scrollOnTwoCards();
     }
@@ -40,20 +44,28 @@ export class App extends Component {
       page: this.state.page,
       per_page: perPage,
     });
-    getImages(paramsFetch.toString()).then(result => {
-      console.log(result);
-      if (!result.hits.length) {
-        return alert('Nothing to show');
-      }
-      this.setState(prevState => {
-        return {
-          arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
-          page: prevState.page + 1,
-          searchQueryForFetch: searchQuery,
-          isScrollTrue: true,
-        };
+    this.setState({ isLoader: true });
+    getImages(paramsFetch.toString())
+      .then(result => {
+        if (!result.hits.length) {
+          return alert('Nothing to show');
+        }
+        this.setState(prevState => {
+          return {
+            arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
+            page: prevState.page + 1,
+            searchQueryForFetch: searchQuery,
+            showBtn: this.state.page < Math.ceil(result.totalHits / 12),
+            isScrollTrue: true,
+          };
+        });
+      })
+      .catch(error => {
+        this.setState({ isError: error.message });
+      })
+      .finally(() => {
+        this.setState({ isLoader: false });
       });
-    });
   };
 
   resetState = () => {
@@ -73,16 +85,14 @@ export class App extends Component {
         return {
           arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
           page: prevState.page + 1,
+          isScrollTrue: true,
+          showBtn: this.state.page < Math.ceil(result.totalHits / 12),
         };
       });
     });
   };
 
   scrollOnTwoCards = () => {
-    console.log('scroll2cards');
-    if (document.getElementById('ImageGallery') === null) {
-      return console.log('null');
-    }
     const { height: cardHeight } = document
       .getElementById('ImageGallery')
       .firstElementChild.getBoundingClientRect();
@@ -91,19 +101,39 @@ export class App extends Component {
       top: cardHeight * 2,
       behavior: 'smooth',
     });
-    // this.setState({ isScrollTrue: false });
   };
 
+  showModal = (link, tags) =>
+    this.setState({ largeImg: link, altForImg: tags, isScrollTrue: false });
+
   render() {
+    const { searchQuery, isLoader, arrayOfImages, showBtn, isError, largeImg, altForImg } =
+      this.state;
     return (
       <section className={css['main-section']}>
         <Searchbar
-          searchQuery={this.state.searchQuery}
+          searchQuery={searchQuery}
           changeSearchQuery={this.changeSearchQuery}
           onSubmit={this.onSubmit}
         />
-        <ImageGallery arrayOfImages={this.state.arrayOfImages} />
-        {this.state.arrayOfImages.length > 0 && <ButtonLoadMore onClick={this.loadMore} />}
+        {isLoader && (
+          <Grid
+            height="100"
+            width="100"
+            color="#3f51b5"
+            ariaLabel="grid-loading"
+            radius="12.5"
+            wrapperStyle={{ marginLeft: 'auto', marginRight: 'auto' }}
+            wrapperClass=""
+            visible={true}
+          />
+        )}
+        <ImageGallery arrayOfImages={arrayOfImages} showModal={this.showModal} />
+        {showBtn && <ButtonLoadMore onClick={this.loadMore} />}
+        {isError && <h2 style={{ textAlign: 'center' }}>Sorry. {isError}😭</h2>}
+        {largeImg && (
+          <Modal largeImg={largeImg} closeModal={this.showModal} altForImg={altForImg} />
+        )}
       </section>
     );
   }
