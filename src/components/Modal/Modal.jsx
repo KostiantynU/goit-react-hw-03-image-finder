@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import css from './Modal.module.css';
+import PropTypes from 'prop-types';
 export class Modal extends Component {
   handleBackdropClick = evt => {
     if (evt.target === evt.currentTarget) {
@@ -39,3 +40,8 @@ export class Modal extends Component {
     );
   }
 }
+Modal.propTypes = {
+  closeModal: PropTypes.func.isRequired,
+  largeImg: PropTypes.string.isRequired,
+  altForImg: PropTypes.string.isRequired,
+};
