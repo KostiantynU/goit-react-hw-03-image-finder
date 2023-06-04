@@ -31,7 +31,7 @@ export class Modal extends Component {
           className={css['close-button']}
           onClick={() => this.props.closeModal('')}
         >
-          <svg id="icon-close_40px" viewBox="0 0 32 32">
+          <svg id="icon-close_40px" viewBox="0 0 32 32" fill="white">
             <path d="M23.733 10.304l-1.504-1.504-5.963 5.963-5.963-5.963-1.504 1.504 5.963 5.963-5.963 5.963 1.504 1.504 5.963-5.963 5.963 5.963 1.504-1.504-5.963-5.963 5.963-5.963z"></path>
           </svg>
         </button>

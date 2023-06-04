@@ -122,7 +122,7 @@ export class App extends Component {
             width="100"
             color="#3f51b5"
             ariaLabel="grid-loading"
-            radius="12.5"
+            radius="16"
             wrapperStyle={{ marginLeft: 'auto', marginRight: 'auto' }}
             wrapperClass=""
             visible={true}
