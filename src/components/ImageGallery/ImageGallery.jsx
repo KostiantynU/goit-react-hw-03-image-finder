@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 export function ImageGallery(props) {
   const { arrayOfImages } = props;
   return (
-    <ul className={css.ImageGallery}>
+    <ul className={css.ImageGallery} id={`ImageGallery`}>
       {arrayOfImages.map(({ id, webformatURL, largeImageURL, tags }) => {
         return (
           <ImageGalleryItem
@@ -25,7 +25,7 @@ ImageGallery.propTypes = {
       id: PropTypes.number.isRequired,
       webformatURL: PropTypes.string.isRequired,
       largeImageURL: PropTypes.string.isRequired,
-      tags: PropTypes.string.isrequired,
+      tags: PropTypes.string.isRequired,
     })
   ).isRequired,
 };
