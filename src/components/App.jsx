@@ -49,7 +49,7 @@ export class App extends Component {
   }
 
   handleSubmit = value => {
-    this.setState({ arrayOfImages: [], searchQuery: value, page: 1, isError: '' });
+    this.setState({ searchQuery: value, page: 1, isError: '', arrayOfImages: [], showBtn: false });
   };
 
   loadMore = () => {
