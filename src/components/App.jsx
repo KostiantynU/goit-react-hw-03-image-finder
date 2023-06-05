@@ -12,51 +12,61 @@ export class App extends Component {
     page: 1,
     perPage: 12,
     searchQuery: '',
-    searchQueryForFetch: '',
     showBtn: false,
-    isScrollTrue: false,
     altForImg: '',
     largeImg: '',
     isLoader: false,
     isError: '',
   };
 
-  componentDidUpdate() {
-    if (this.state.isScrollTrue) {
-      this.scrollOnTwoCards();
+  componentDidUpdate(_, prevState) {
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      const { searchQuery, perPage, page } = this.state;
+      const paramsFetch = new URLSearchParams({
+        q: searchQuery,
+        page: page,
+        per_page: perPage,
+      });
+      this.setState({ isLoader: true });
+      getImages(paramsFetch.toString())
+        .then(result => {
+          if (!result.hits.length) {
+            return this.setState({ isError: 'Ssory, no matches found' });
+          }
+          this.setState({
+            arrayOfImages: [...result.hits],
+            showBtn: this.state.page < Math.ceil(result.totalHits / 12),
+          });
+        })
+        .catch(error => {
+          this.setState({ isError: error.message });
+        })
+        .finally(() => {
+          this.setState({ isLoader: false });
+        });
     }
   }
 
-  changeSearchQuery = evt => {
-    this.setState({ searchQuery: evt.target.value, isScrollTrue: false });
+  onSubmit = evt => {
+    evt.preventDefault();
+    this.setState({ searchQuery: evt.target[1].value, page: 1 });
   };
 
-  onSubmit = async evt => {
-    evt.preventDefault();
+  loadMore = () => {
+    const { searchQuery, page, perPage } = this.state;
 
-    const { searchQuery, searchQueryForFetch, perPage } = this.state;
-
-    if (searchQuery !== searchQueryForFetch) {
-      await this.resetState();
-    }
     const paramsFetch = new URLSearchParams({
       q: searchQuery,
-      page: this.state.page,
+      page: page + 1,
       per_page: perPage,
     });
-    this.setState({ isLoader: true });
     getImages(paramsFetch.toString())
-      .then(result => {
-        if (!result.hits.length) {
-          return alert('Nothing to show');
-        }
-        this.setState(prevState => {
+      .then(async result => {
+        await this.setState(prevState => {
           return {
             arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
             page: prevState.page + 1,
-            searchQueryForFetch: searchQuery,
             showBtn: this.state.page < Math.ceil(result.totalHits / 12),
-            isScrollTrue: true,
           };
         });
       })
@@ -64,32 +74,8 @@ export class App extends Component {
         this.setState({ isError: error.message });
       })
       .finally(() => {
-        this.setState({ isLoader: false });
+        this.scrollOnTwoCards();
       });
-  };
-
-  resetState = () => {
-    this.setState({ page: 1, arrayOfImages: [], isScrollTrue: false });
-  };
-
-  loadMore = async () => {
-    const { searchQueryForFetch, page, perPage } = this.state;
-
-    const paramsFetch = new URLSearchParams({
-      q: searchQueryForFetch,
-      page: page,
-      per_page: perPage,
-    });
-    getImages(paramsFetch.toString()).then(async result => {
-      await this.setState(prevState => {
-        return {
-          arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
-          page: prevState.page + 1,
-          isScrollTrue: true,
-          showBtn: this.state.page < Math.ceil(result.totalHits / 12),
-        };
-      });
-    });
   };
 
   scrollOnTwoCards = () => {
@@ -107,22 +93,17 @@ export class App extends Component {
     this.setState({ largeImg: link, altForImg: tags, isScrollTrue: false });
 
   render() {
-    const { searchQuery, isLoader, arrayOfImages, showBtn, isError, largeImg, altForImg } =
-      this.state;
+    const { isLoader, arrayOfImages, showBtn, isError, largeImg, altForImg } = this.state;
     return (
       <section className={css['main-section']}>
-        <Searchbar
-          searchQuery={searchQuery}
-          changeSearchQuery={this.changeSearchQuery}
-          onSubmit={this.onSubmit}
-        />
+        <Searchbar onSubmit={this.onSubmit} />
         {isLoader && (
           <Grid
             height="100"
             width="100"
             color="#3f51b5"
             ariaLabel="grid-loading"
-            radius="16"
+            radius="12"
             wrapperStyle={{ marginLeft: 'auto', marginRight: 'auto' }}
             wrapperClass=""
             visible={true}
