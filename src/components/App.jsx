@@ -33,10 +33,10 @@ export class App extends Component {
           if (!result.hits.length) {
             return this.setState({ isError: 'Ssory, no matches found' });
           }
-          this.setState({
+          this.setState(prevState => ({
             arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
             showBtn: this.state.page < Math.ceil(result.totalHits / 12),
-          });
+          }));
         })
         .catch(error => {
           this.setState({ isError: error.message });
