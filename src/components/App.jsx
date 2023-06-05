@@ -20,7 +20,7 @@ export class App extends Component {
   };
 
   componentDidUpdate(_, prevState) {
-    if (prevState.searchQuery !== this.state.searchQuery) {
+    if (prevState.searchQuery !== this.state.searchQuery || prevState.page !== this.state.page) {
       const { searchQuery, perPage, page } = this.state;
       const paramsFetch = new URLSearchParams({
         q: searchQuery,
@@ -34,7 +34,7 @@ export class App extends Component {
             return this.setState({ isError: 'Ssory, no matches found' });
           }
           this.setState({
-            arrayOfImages: [...result.hits],
+            arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
             showBtn: this.state.page < Math.ceil(result.totalHits / 12),
           });
         })
@@ -43,39 +43,17 @@ export class App extends Component {
         })
         .finally(() => {
           this.setState({ isLoader: false });
+          this.scrollOnTwoCards();
         });
     }
   }
 
-  onSubmit = evt => {
-    evt.preventDefault();
-    this.setState({ searchQuery: evt.target[1].value, page: 1 });
+  onSubmit = value => {
+    this.setState({ searchQuery: value, page: 1, isError: '' });
   };
 
   loadMore = () => {
-    const { searchQuery, page, perPage } = this.state;
-
-    const paramsFetch = new URLSearchParams({
-      q: searchQuery,
-      page: page + 1,
-      per_page: perPage,
-    });
-    getImages(paramsFetch.toString())
-      .then(async result => {
-        await this.setState(prevState => {
-          return {
-            arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
-            page: prevState.page + 1,
-            showBtn: this.state.page < Math.ceil(result.totalHits / 12),
-          };
-        });
-      })
-      .catch(error => {
-        this.setState({ isError: error.message });
-      })
-      .finally(() => {
-        this.scrollOnTwoCards();
-      });
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   scrollOnTwoCards = () => {
