@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import css from './App.module.css';
 import { Searchbar } from './Searchbar/';
 import { ImageGallery } from './ImageGallery';
-import { getImages } from './Services/Api';
+import { getImages } from '../Services/Api';
 import { ButtonLoadMore } from './ButtonLoadMore/ButtonLoadMore';
 import { Modal } from './Modal';
 import { Grid } from 'react-loader-spinner';
@@ -20,8 +20,8 @@ export class App extends Component {
   };
 
   componentDidUpdate(_, prevState) {
-    if (prevState.searchQuery !== this.state.searchQuery || prevState.page !== this.state.page) {
-      const { searchQuery, perPage, page } = this.state;
+    const { searchQuery, perPage, page } = this.state;
+    if (searchQuery !== prevState.searchQuery || page !== prevState.page) {
       const paramsFetch = new URLSearchParams({
         q: searchQuery,
         page: page,
@@ -43,29 +43,29 @@ export class App extends Component {
         })
         .finally(() => {
           this.setState({ isLoader: false });
-          this.scrollOnTwoCards();
+          // this.scrollOnTwoCards();
         });
     }
   }
 
-  onSubmit = value => {
-    this.setState({ searchQuery: value, page: 1, isError: '' });
+  handleSubmit = value => {
+    this.setState({ arrayOfImages: [], searchQuery: value, page: 1, isError: '' });
   };
 
   loadMore = () => {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
-  scrollOnTwoCards = () => {
-    const { height: cardHeight } = document
-      .getElementById('ImageGallery')
-      .firstElementChild.getBoundingClientRect();
+  // scrollOnTwoCards = () => {
+  //   const { height: cardHeight } = document
+  //     .getElementById('ImageGallery')
+  //     .firstElementChild.getBoundingClientRect();
 
-    window.scrollBy({
-      top: cardHeight * 2,
-      behavior: 'smooth',
-    });
-  };
+  //   window.scrollBy({
+  //     top: cardHeight * 2,
+  //     behavior: 'smooth',
+  //   });
+  // };
 
   showModal = (link, tags) =>
     this.setState({ largeImg: link, altForImg: tags, isScrollTrue: false });
@@ -74,7 +74,7 @@ export class App extends Component {
     const { isLoader, arrayOfImages, showBtn, isError, largeImg, altForImg } = this.state;
     return (
       <section className={css['main-section']}>
-        <Searchbar onSubmit={this.onSubmit} />
+        <Searchbar handleSubmit={this.handleSubmit} />
         {isLoader && (
           <Grid
             height="100"
