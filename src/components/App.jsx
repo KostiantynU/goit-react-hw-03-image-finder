@@ -17,6 +17,7 @@ export class App extends Component {
     largeImg: '',
     isLoader: false,
     isError: '',
+    isScroll: false,
   };
 
   componentDidUpdate(_, prevState) {
@@ -27,13 +28,13 @@ export class App extends Component {
         page: page,
         per_page: perPage,
       });
-      this.setState({ isLoader: true });
+      this.setState({ isLoader: true, isScroll: false });
       getImages(paramsFetch.toString())
-        .then(result => {
+        .then(async result => {
           if (!result.hits.length) {
             return this.setState({ isError: 'Ssory, no matches found' });
           }
-          this.setState(prevState => ({
+          await this.setState(prevState => ({
             arrayOfImages: [...prevState.arrayOfImages, ...result.hits],
             showBtn: this.state.page < Math.ceil(result.totalHits / 12),
           }));
@@ -42,9 +43,11 @@ export class App extends Component {
           this.setState({ isError: error.message });
         })
         .finally(() => {
-          this.setState({ isLoader: false });
-          // this.scrollOnTwoCards();
+          this.setState({ isLoader: false, isScroll: true });
         });
+    }
+    if (this.state.isScroll) {
+      this.scrollOnTwoCards();
     }
   }
 
@@ -56,16 +59,16 @@ export class App extends Component {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
-  // scrollOnTwoCards = () => {
-  //   const { height: cardHeight } = document
-  //     .getElementById('ImageGallery')
-  //     .firstElementChild.getBoundingClientRect();
+  scrollOnTwoCards = () => {
+    const { height: cardHeight } = document
+      .getElementById('ImageGallery')
+      .firstElementChild.getBoundingClientRect();
 
-  //   window.scrollBy({
-  //     top: cardHeight * 2,
-  //     behavior: 'smooth',
-  //   });
-  // };
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
+    });
+  };
 
   showModal = (link, tags) =>
     this.setState({ largeImg: link, altForImg: tags, isScrollTrue: false });
